@@ -6,6 +6,8 @@ const TAGLINE = 'Polishing will always exist — for the few cars that can affor
 // Single available asset (wordmark).
 const LOGO_SRC = './assets/logo.png';
 const BANNER_SRC = './assets/banner_with_text.png';
+const SPOTLIGHT_IMG_SRC = './assets/main-image.png';
+const FACTORY_SIG_SRC = './assets/factoryforever.png';
 const PUBLIC_ASSET_BASE = 'https://skygloss-signature-builder.netlify.app/';
 const ICON_SRCS = {
   tel: './assets/icon-phone.svg',
@@ -14,7 +16,7 @@ const ICON_SRCS = {
   addr: './assets/icon-address.svg',
 };
 
-let layout = 1;
+let layout = 7;
 let opts = { tagline: true, taglineMode: 'image', hiring: false, demo: false };
 let bg = 'white';
 const assetDataUrlCache = new Map();
@@ -112,6 +114,8 @@ async function buildClipboardHTML() {
   }
 
   html = html.replace(new RegExp(escapeRegExp(BANNER_SRC), 'g'), absoluteAssetUrl(BANNER_SRC));
+  html = html.replace(new RegExp(escapeRegExp(SPOTLIGHT_IMG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_IMG_SRC));
+  html = html.replace(new RegExp(escapeRegExp(FACTORY_SIG_SRC), 'g'), absoluteAssetUrl(FACTORY_SIG_SRC));
 
   const root = document.createElement('div');
   root.innerHTML = html;
@@ -328,7 +332,42 @@ function buildSig() {
   const tagModeEffective = ((opts.taglineMode || 'text') === 'image' && isTagImageAllowed) ? 'image' : 'text';
 
   // Layout numbering follows picker order:
-  // 1 Showcase, 2 Ribbon, 3 Classic, 4 Banner, 5 Studio, 6 Split
+  // 7 Spotlight (first in picker), 1 Showcase, 2 Ribbon, 3 Classic, 4 Banner, 5 Studio, 6 Split
+
+  // Spotlight: bold two-panel banner — black identity panel + hero image.
+  // Fixed design; extra fields (mobile, address, company, tagline, badges) are ignored.
+  if (layout === 7) {
+    const spotBlue = '#11a3e6';
+    const spotFont = 'Muli, Mulish, Arial, sans-serif';
+    const siteText = (website ? website.replace(/^https?:\/\//, '') : 'skygloss.com').toUpperCase();
+    const linkStyle = `font-family:${spotFont};color:#ffffff;text-decoration:none`;
+    const contactStyle = `font-size:15px;line-height:1.4;color:#ffffff;font-family:${spotFont};letter-spacing:.05em`;
+    const contactRows = [
+      tel ? `<div style="${contactStyle}"><a href="tel:${tel}" style="${linkStyle}">${tel}</a></div>` : '',
+      email ? `<div style="${contactStyle}"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
+    ].join('');
+    // Whole banner is 2.5:1 (1000:400 -> 600x240). Left black text panel 240px / hero image 360px (2:3).
+    const spotH = 240;
+    // The "Factory Forever" script spans the gap between SKYGLOSS.COM and the name,
+    // centered on the seam (x=240) between the black panel and the image.
+    return `<div style="position:relative;display:inline-block;width:600px;max-width:600px;background:#000000;line-height:0;font-size:0">
+  <table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#000000">
+  <tr>
+    <td style="width:240px;height:${spotH}px;background:#000000;vertical-align:top;padding:26px 28px 22px 28px">
+      <div style="font-size:16px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.05em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
+      <div style="height:56px;line-height:56px;font-size:0">&nbsp;</div>
+      <div style="font-size:22px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.02em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
+      ${title ? `<div style="padding-top:6px;font-size:15px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.06em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
+      ${contactRows ? `<div style="height:14px;line-height:14px;font-size:0">&nbsp;</div>${contactRows}` : ''}
+    </td>
+    <td style="width:360px;height:${spotH}px;padding:0;vertical-align:top;font-size:0;line-height:0">
+      <img src="${SPOTLIGHT_IMG_SRC}" alt="SkyGloss" width="360" height="${spotH}" style="display:block;width:360px;height:${spotH}px;object-fit:cover;border:0">
+    </td>
+  </tr>
+  </table>
+  <img src="${FACTORY_SIG_SRC}" alt="Factory Forever" width="166" style="position:absolute;top:45px;left:157px;width:166px;height:auto;border:0;pointer-events:none">
+</div>`;
+  }
 
   if (layout === 3) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif">
   <tr>
@@ -525,7 +564,9 @@ async function copyHTML() {
   } catch {
     html = html
       .replace(new RegExp(escapeRegExp(LOGO_SRC), 'g'), absoluteAssetUrl(LOGO_SRC))
-      .replace(new RegExp(escapeRegExp(BANNER_SRC), 'g'), absoluteAssetUrl(BANNER_SRC));
+      .replace(new RegExp(escapeRegExp(BANNER_SRC), 'g'), absoluteAssetUrl(BANNER_SRC))
+      .replace(new RegExp(escapeRegExp(SPOTLIGHT_IMG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_IMG_SRC))
+      .replace(new RegExp(escapeRegExp(FACTORY_SIG_SRC), 'g'), absoluteAssetUrl(FACTORY_SIG_SRC));
     Object.values(ICON_SRCS).forEach((src) => {
       html = html.replace(new RegExp(escapeRegExp(src), 'g'), absoluteAssetUrl(src));
     });
@@ -568,7 +609,7 @@ function downloadHTML() {
 
 function setLayout(n) {
   layout = n;
-  [1, 2, 3, 4, 5, 6].forEach(i => g(`lopt_${i}`)?.classList.toggle('sel', i === n));
+  [1, 2, 3, 4, 5, 6, 7].forEach(i => g(`lopt_${i}`)?.classList.toggle('sel', i === n));
   applyTaglineModeAvailability();
   render();
 }
@@ -616,12 +657,12 @@ function init() {
   if (hdr) hdr.src = LOGO_SRC;
 
   // Ensure a preview is visible immediately on load
-  layout = 1;
+  layout = 7;
   opts = { tagline: true, taglineMode: 'image', hiring: false, demo: false };
   bg = 'white';
 
   // Reflect defaults in UI
-  [1, 2, 3, 4, 5, 6].forEach(i => g(`lopt_${i}`)?.classList.toggle('sel', i === 1));
+  [1, 2, 3, 4, 5, 6, 7].forEach(i => g(`lopt_${i}`)?.classList.toggle('sel', i === 7));
   document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.bg === 'white'));
   g('tog_tagline')?.classList.add('on');
   ['hiring', 'demo'].forEach(k => g(`tog_${k}`)?.classList.remove('on'));
