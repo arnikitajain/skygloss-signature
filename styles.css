@@ -73,13 +73,11 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .mode-btn:disabled:hover{background:transparent;color:var(--muted)}
 
 /* LAYOUT PICKER */
-.lpick{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-.lopt{border:1.5px solid var(--border);border-radius:9px;padding:10px 8px 8px;cursor:pointer;transition:all .18s;background:var(--bg);text-align:center}
+.lpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.lopt{border:1.5px solid var(--border);border-radius:9px;padding:13px 10px;cursor:pointer;transition:all .18s;background:var(--bg);text-align:center}
 .lopt:hover{border-color:var(--border-sky);background:var(--sky-light)}
 .lopt.sel{border-color:var(--sky);background:var(--sky-light);box-shadow:0 0 0 2px var(--sky-glow)}
-.lopt-thumb{width:100%;height:48px;border-radius:5px;overflow:hidden;background:#eef2f6;margin-bottom:6px;display:flex;align-items:center;justify-content:center}
-.lopt.sel .lopt-thumb{background:#dff0fb}
-.lopt-name{font-size:9.5px;color:var(--muted);font-family:'Mulish',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:color .18s}
+.lopt-name{font-size:10.5px;color:var(--muted);font-family:'Mulish',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:color .18s}
 .lopt.sel .lopt-name{color:var(--sky-dark)}
 
 @media (max-width: 900px){
