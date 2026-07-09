@@ -363,9 +363,9 @@ function buildSig() {
     return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#000000">
   <tr>
     <td style="width:240px;height:${spotH}px;background:#000000;vertical-align:top;padding:0;font-size:0;line-height:0">
-      <div style="padding:26px 0 0 28px;font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
-      <div style="text-align:right;line-height:0;font-size:0;margin-top:-4px">
-        <img src="${LEFT_FRAME_SRC}" alt="" width="152" height="103" style="display:inline-block;width:152px;height:103px;border:0;margin-top:3px;">
+      <div style="padding:25px 0 0 28px;font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
+      <div style="text-align:right;line-height:0;font-size:0">
+        <img src="${LEFT_FRAME_SRC}" alt="" width="152" height="103" style="display:inline-block;width:152px;height:103px;border:0;">
       </div>
       <div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
       ${title ? `<div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
