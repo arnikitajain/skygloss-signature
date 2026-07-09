@@ -341,7 +341,7 @@ function buildSig() {
     const spotFont = 'Muli, Mulish, Arial, sans-serif';
     const siteText = (website ? website.replace(/^https?:\/\//, '') : 'skygloss.com').toUpperCase();
     const linkStyle = `font-family:${spotFont};color:#ffffff;text-decoration:none`;
-    const contactStyle = `font-size:12px;line-height:1.4;color:#ffffff;font-family:${spotFont};letter-spacing:.25em`;
+    const contactStyle = `font-size:9px;line-height:1.4;color:#ffffff;font-family:${spotFont};letter-spacing:.25em`;
     const contactRows = [
       tel ? `<div style="${contactStyle}"><a href="tel:${tel}" style="${linkStyle}">${tel}</a></div>` : '',
       email ? `<div style="${contactStyle}"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
@@ -356,9 +356,9 @@ function buildSig() {
   <tr>
     <td style="width:240px;height:${spotH}px;background:#000000;vertical-align:top;padding:26px 28px 22px 28px">
       <div style="font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
-      <div style="height:91px;line-height:91px;font-size:0">&nbsp;</div>
-      <div style="font-size:12px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
-      ${title ? `<div style="padding-top:6px;font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
+      <div style="height:104px;line-height:104px;font-size:0">&nbsp;</div>
+      <div style="font-size:10px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
+      ${title ? `<div style="padding-top:6px;font-size:10px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
       ${contactRows ? `<div style="height:14px;line-height:14px;font-size:0">&nbsp;</div>${contactRows}` : ''}
     </td>
     <td style="width:360px;height:${spotH}px;padding:0;vertical-align:top;font-size:0;line-height:0">
