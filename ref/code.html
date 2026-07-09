@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SkyGloss Email Signature</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Montserrat:wght@400;700;800&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .brand-font {
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 0.1em;
+    }
+
+    .signature-font {
+      /* Simulating the script signature look */
+      font-family: 'Brush Script MT', cursive;
+      font-style: italic;
+    }
+  </style>
+<style data-purpose="layout-adjustments">
+    /* Custom split for the specific image aspect ratio used in the banner */
+    .banner-container {
+      max-width: 800px;
+      overflow: hidden;
+    }
+    
+    .left-panel {
+      background-color: #000000;
+      flex: 0 0 40%;
+    }
+    
+    .right-panel {
+      flex: 0 0 60%;
+      position: relative;
+    }
+
+    .sky-blue-text {
+      color: #00ADEF;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-8">
+<!-- BEGIN: SignatureContainer -->
+<div class="banner-container mx-auto bg-white shadow-lg flex flex-col md:flex-row overflow-hidden" id="email-signature">
+<!-- BEGIN: ContactDetailsSection -->
+<div class="left-panel p-8 flex flex-col justify-between text-white" data-purpose="contact-info">
+<!-- Logo/Website Area -->
+<div class="mb-12">
+<h2 class="brand-font sky-blue-text font-extrabold text-xl uppercase tracking-widest">
+          SKYGLOSS.COM
+        </h2>
+</div>
+<!-- Main Contact Details -->
+<div class="space-y-6">
+<!-- Name and Title -->
+<div data-purpose="user-identity">
+<h1 class="brand-font font-bold text-2xl uppercase tracking-tighter">
+            PAUL FILART
+          </h1>
+<p class="brand-font sky-blue-text font-bold text-lg uppercase tracking-widest mt-1">
+            SALES DIRECTOR
+          </p>
+</div>
+<!-- Phone and Email -->
+<div class="brand-font text-lg space-y-1 font-medium tracking-widest" data-purpose="contact-methods">
+<p class="">602 560 9529</p>
+<p class="uppercase">PAUL@SKYGLOSS.COM</p>
+</div>
+</div>
+</div>
+<!-- END: ContactDetailsSection -->
+<!-- BEGIN: HeroImageSection -->
+<div class="right-panel min-h-[320px]" data-purpose="branding-visual">
+<!-- Background Image -->
+<img alt="SkyGloss Factory Forever" class="absolute inset-0 w-full h-full object-cover object-right" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6zkazA1Bcds4V6A4_DcHEoJzDGaoDrgM3KLSYWaAFthRtjpr6jnWMq5AypH0AT79K1jOwjy6Wu-5S0iy7elZjoVAJg78OZAj7HxXueO2tcB26MBHGQTVxHyO7fQodqwJxszf21fEIPXnNmVyQtGUyul8UiE-d92LycDalt6yVvwunus5MUm5FDHPlDpTc58TgQJUso3rIfj-VRD9exsPGT7emhhZTmgElvTc6V_tLd48pzegZg8LFhRaXQn3rdEMW5M20DDD_WgAJ">
+<!-- Overlay Script Text "Factory Forever" -->
+<!-- Since this is a recreation of a static image that already contains the script, 
+           the background image provided (IMAGE_2) already has the "Factory Forever" and "Fusion" product 
+           baked in. We display the image to match the layout. -->
+</div>
+<!-- END: HeroImageSection -->
+</div>
+<!-- END: SignatureContainer -->
+<!-- BEGIN: FooterInstructions -->
+<div class="max-w-[800px] mx-auto mt-6 text-gray-500 text-sm italic">
+
+</div>
+<!-- END: FooterInstructions -->
+
+
+</body></html>
