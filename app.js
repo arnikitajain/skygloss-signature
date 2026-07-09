@@ -9,6 +9,8 @@ const BANNER_SRC = './assets/banner_with_text.png';
 const SPOTLIGHT_IMG_SRC = './assets/main-image.png';
 const FACTORY_SIG_SRC = './assets/factoryforever.png';
 const SPOTLIGHT_BG_SRC = './assets/email-signature-bg.png';
+const LEFT_FRAME_SRC = './assets/left-frame.png';
+const RIGHT_FRAME_SRC = './assets/right-frame.png';
 const PUBLIC_ASSET_BASE = 'https://skygloss-signature-builder.netlify.app/';
 const ICON_SRCS = {
   tel: './assets/icon-phone.svg',
@@ -118,6 +120,8 @@ async function buildClipboardHTML() {
   html = html.replace(new RegExp(escapeRegExp(SPOTLIGHT_IMG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_IMG_SRC));
   html = html.replace(new RegExp(escapeRegExp(FACTORY_SIG_SRC), 'g'), absoluteAssetUrl(FACTORY_SIG_SRC));
   html = html.replace(new RegExp(escapeRegExp(SPOTLIGHT_BG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_BG_SRC));
+  html = html.replace(new RegExp(escapeRegExp(LEFT_FRAME_SRC), 'g'), absoluteAssetUrl(LEFT_FRAME_SRC));
+  html = html.replace(new RegExp(escapeRegExp(RIGHT_FRAME_SRC), 'g'), absoluteAssetUrl(RIGHT_FRAME_SRC));
 
   const root = document.createElement('div');
   root.innerHTML = html;
@@ -348,24 +352,30 @@ function buildSig() {
       tel ? `<div style="${contactStyle}"><a href="tel:${tel}" style="${linkStyle}">${tel}</a></div>` : '',
       email ? `<div style="${contactStyle}"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
     ].join('');
-    // Whole banner is 2.5:1 (1000:400 -> 600x240). The background image bakes in
-    // the black left panel, the "Factory Forever" script and the hero photo; the
-    // text below is overlaid on top of the black left panel (240px).
+    // Whole banner is 2.5:1 (1000:400 -> 600x240), scale 0.6. Email-safe two-cell
+    // table (Gmail/Outlook strip position + background-image, so no overlay):
+    //   Left cell  = solid black panel with live text; the left half of the
+    //                "Factory Forever" script (left-frame.png, white on transparent)
+    //                sits flush to the seam so it continues into the right cell.
+    //   Right cell = right-frame.png (photo + right half of the script).
+    // left-frame source 254x172 -> 152x103 displayed; right-frame 599x400 -> 360x240.
     const spotH = 240;
-    return `<div style="position:relative;display:inline-block;width:600px;max-width:600px;background:#000000;line-height:0;font-size:0">
-  <img src="${SPOTLIGHT_BG_SRC}" alt="SkyGloss" width="600" height="${spotH}" style="display:block;width:600px;height:${spotH}px;border:0">
-  <table cellpadding="0" cellspacing="0" border="0" style="position:absolute;top:0;left:0;font-family:${spotFont};width:240px;border-collapse:collapse;table-layout:fixed">
+    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#000000">
   <tr>
-    <td style="width:240px;height:${spotH}px;vertical-align:top;padding:26px 28px 22px 28px">
-      <div style="font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
-      <div style="height:104px;line-height:104px;font-size:0">&nbsp;</div>
-      <div style="font-size:10px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
-      ${title ? `<div style="padding-top:6px;font-size:10px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
-      ${contactRows ? `<div style="height:14px;line-height:14px;font-size:0">&nbsp;</div>${contactRows}` : ''}
+    <td style="width:240px;height:${spotH}px;background:#000000;vertical-align:top;padding:0;font-size:0;line-height:0">
+      <div style="padding:26px 0 0 28px;font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
+      <div style="text-align:right;line-height:0;font-size:0;margin-top:-4px">
+        <img src="${LEFT_FRAME_SRC}" alt="" width="152" height="103" style="display:inline-block;width:152px;height:103px;border:0">
+      </div>
+      <div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
+      ${title ? `<div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
+      ${contactRows ? `<div style="padding:12px 28px 0 28px;font-size:0;line-height:0">${contactRows}</div>` : ''}
+    </td>
+    <td style="width:360px;height:${spotH}px;padding:0;vertical-align:top;font-size:0;line-height:0">
+      <img src="${RIGHT_FRAME_SRC}" alt="SkyGloss" width="360" height="${spotH}" style="display:block;width:360px;height:${spotH}px;border:0">
     </td>
   </tr>
-  </table>
-</div>`;
+  </table>`;
   }
 
   if (layout === 3) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif">
