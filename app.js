@@ -346,30 +346,31 @@ function buildSig() {
     const spotBlue = '#11a3e6';
     const spotFont = 'Muli, Mulish, Arial, sans-serif';
     const siteText = (website ? website.replace(/^https?:\/\//, '') : 'skygloss.com').toUpperCase();
-    const linkStyle = `font-family:${spotFont};color:#ffffff;text-decoration:none`;
-    const contactStyle = `font-size:9px;line-height:1.4;color:#ffffff;font-family:${spotFont};letter-spacing:.25em`;
+    const linkStyle = `font-family:${spotFont};color:#000000;text-decoration:none`;
+    const contactStyle = `font-size:10px;line-height:1.0;color:#000000;font-family:${spotFont};letter-spacing:.25em`;
     const contactRows = [
       tel ? `<div style="${contactStyle}"><a href="tel:${tel}" style="${linkStyle}">${tel}</a></div>` : '',
-      email ? `<div style="${contactStyle}"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
+      email ? `<div style="${contactStyle};padding-top:8px"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
     ].join('');
     // Whole banner is 2.5:1 (1000:400 -> 600x240), scale 0.6. Email-safe two-cell
     // table (Gmail/Outlook strip position + background-image, so no overlay):
-    //   Left cell  = solid black panel with live text; the left half of the
-    //                "Factory Forever" script (left-frame.png, white on transparent)
+    //   Left cell  = solid white panel with live text; the left half of the
+    //                "Factory Forever" script (left-frame.png, blue on transparent)
     //                sits flush to the seam so it continues into the right cell.
     //   Right cell = right-frame.png (photo + right half of the script).
-    // left-frame source 254x172 -> 152x103 displayed; right-frame 599x400 -> 360x240.
+    // left-frame source 208x139 -> 125x83 displayed; right-frame 598x400 -> 360x240 (both ~0.6 scale).
     const spotH = 240;
-    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#000000">
+    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#ffffff">
   <tr>
-    <td style="width:240px;height:${spotH}px;background:#000000;vertical-align:top;padding:0;font-size:0;line-height:0">
-      <div style="padding:25px 0 0 28px;font-size:12px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
+    <td style="width:240px;height:${spotH}px;background:#ffffff;vertical-align:top;padding:0;font-size:0;line-height:0">
+      <div style="padding:24px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:#000000;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
+      ${title ? `<div style="padding:6px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
       <div style="text-align:right;line-height:0;font-size:0">
-        <img src="${LEFT_FRAME_SRC}" alt="" width="152" height="103" style="display:inline-block;width:152px;height:103px;border:0;">
+        <img src="${LEFT_FRAME_SRC}" alt="" width="128" height="86" style="display:inline-block;width:128px;height:auto;border:0;padding-top:7px;">
       </div>
-      <div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
-      ${title ? `<div style="padding:6px 28px 0 28px;font-size:10px;line-height:1.2;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
-      ${contactRows ? `<div style="padding:12px 28px 0 28px;font-size:0;line-height:0">${contactRows}</div>` : ''}
+      ${contactRows ? `<div style="padding:6px 0 0 0;font-size:0;line-height:0">${contactRows}</div>` : ''}
+      <div style="padding:11px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:#000000;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">SKYGLOSS, INC.</div>
+      <div style="padding:8px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
     </td>
     <td style="width:360px;height:${spotH}px;padding:0;vertical-align:top;font-size:0;line-height:0">
       <img src="${RIGHT_FRAME_SRC}" alt="SkyGloss" width="360" height="${spotH}" style="display:block;width:360px;height:${spotH}px;border:0">
