@@ -19,46 +19,19 @@
     <div class="grid">
       <!-- LEFT -->
       <div>
-        <div class="pnl" style="margin-bottom:20px">
+        <div class="pnl">
           <div class="pnl-hdr"><div class="pnl-dot"></div><div class="pnl-ttl">Your Details</div></div>
           <div class="pnl-body">
             <div class="fsec">
               <div class="fsec-lbl">Identity</div>
               <div class="field"><label>Full Name</label><input type="text" id="f_name" placeholder="Neil Erickson"></div>
               <div class="field"><label>Job Title</label><input type="text" id="f_title" placeholder="Regional Director"></div>
-              <div class="field"><label>Company / Division</label><input type="text" id="f_company" placeholder="SkyGloss Global"></div>
             </div>
             <div class="fsec">
               <div class="fsec-lbl">Contact</div>
-              <div class="field"><label>Telephone</label><input type="tel" id="f_tel" placeholder="+1 (602) 784-41134"></div>
-              <div class="field"><label>Mobile</label><input type="tel" id="f_mobile" placeholder="+1 (602) 784-4113‬"></div>
+              <div class="field"><label>Phone</label><input type="tel" id="f_tel" placeholder="+1 (602) 784-41134"></div>
               <div class="field"><label>Email</label><input type="email" id="f_email" placeholder="name@skygloss.com"></div>
               <div class="field"><label>Website</label><input type="url" id="f_website" placeholder="https://skygloss.com"></div>
-              <div class="field"><label>Address <span style="color:var(--muted2);font-size:10px">(optional)</span></label><input type="text" id="f_address" placeholder="8342 W Camelback Rd, STE 205 Scottsdale AZ 85251 United States"></div>
-            </div>
-            <div class="fsec">
-              <div class="fsec-lbl">Optional Extras</div>
-              <div class="tog" id="tog_tagline" data-opt="tagline">
-                <span class="tog-lbl">Show Tagline</span><div class="tog-pill"></div>
-              </div>
-              <div class="tog-sub" id="sub_tagline">
-                <div class="field">
-                  <label>Tagline style</label>
-                  <div class="mode-btns" role="group" aria-label="Tagline style">
-                    <button class="mode-btn active" type="button" data-tagmode="text">Text</button>
-                    <button class="mode-btn" type="button" data-tagmode="image">Image</button>
-                  </div>
-                </div>
-              </div>
-              <div class="tog" id="tog_hiring" data-opt="hiring">
-                <span class="tog-lbl">🚀 We Are Hiring!</span><div class="tog-pill"></div>
-              </div>
-              <div class="tog" id="tog_demo" data-opt="demo">
-                <span class="tog-lbl">Book a Consultation</span><div class="tog-pill"></div>
-              </div>
-              <div class="tog-sub" id="sub_demo">
-                <div class="field"><label>Consultation URL</label><input type="url" id="f_demo" placeholder="https://demo.skygloss.com"></div>
-              </div>
             </div>
           </div>
         </div>
@@ -67,7 +40,7 @@
 
       <!-- RIGHT: PREVIEW -->
       <div>
-        <div class="pnl" style="position:sticky;top:24px">
+        <div class="pnl" style="position:sticky;top:24px;height:100%;display:flex;flex-direction:column">
           <div class="prev-tb">
             <div class="prev-ttl"><div class="pnl-dot"></div>Live Preview</div>
             <div class="prev-actions">
@@ -83,7 +56,7 @@
           <div class="prev-stage bg-white" id="prev_stage">
             <div id="sig_preview"></div>
           </div>
-          <div class="out-wrap">
+          <div class="out-wrap" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
             <div class="out-lbl">HTML Code — paste into Gmail / Outlook / Apple Mail</div>
             <textarea class="out-ta" id="html_out" readonly></textarea>
           </div>

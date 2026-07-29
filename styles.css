@@ -28,7 +28,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .hdr-ttl{font-family:'Mulish',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:stretch}
 
 /* PANELS */
 .pnl{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(0,60,120,.06)}
@@ -104,7 +104,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .btn-sky:hover{background:var(--sky-dark);border-color:var(--sky-dark);color:#fff}
 
 /* STAGE */
-.prev-stage{padding:40px 36px;min-height:260px;display:flex;align-items:center;justify-content:center;transition:background .3s}
+.prev-stage{padding:40px 36px;min-height:260px;flex:1;display:flex;align-items:center;justify-content:center;transition:background .3s}
 .prev-stage.bg-dark{background:#111418}
 .prev-stage.bg-mid{background:#edf1f5}
 .prev-stage.bg-white{background:#ffffff}
