@@ -11,6 +11,7 @@ const FACTORY_SIG_SRC = './assets/factoryforever.png';
 const SPOTLIGHT_BG_SRC = './assets/email-signature-bg.png';
 const LEFT_FRAME_SRC = './assets/left-frame.png';
 const RIGHT_FRAME_SRC = './assets/right-frame.png';
+const BLUE_SIG_SRC = './assets/blue_signatur.svg';
 const PUBLIC_ASSET_BASE = 'https://skygloss-signature-builder.netlify.app/';
 const ICON_SRCS = {
   tel: './assets/icon-phone.svg',
@@ -123,6 +124,7 @@ async function buildClipboardHTML() {
     SPOTLIGHT_BG_SRC,
     LEFT_FRAME_SRC,
     RIGHT_FRAME_SRC,
+    BLUE_SIG_SRC,
   ];
   for (const src of hostedAssets) {
     html = html.replace(new RegExp(escapeRegExp(src), 'g'), absoluteAssetUrl(src));
@@ -378,11 +380,10 @@ function buildSig() {
   // Layout numbering follows picker order:
   // 7 Spotlight (first in picker), 1 Showcase, 2 Ribbon, 3 Classic, 4 Banner, 5 Studio, 6 Split
 
-  // Spotlight: two-panel banner — white identity panel + hero image.
-  // Fluid 40/60 table (max 600px) so mobile scales the whole unit and the
-  // Factory Forever seam stays joined. Extra fields ignored.
+  // Spotlight: white identity panel + main-image half, with blue Factory Forever
+  // signature centered across the seam from the top.
   if (layout === 7) {
-    const spotBlue = '#11a3e6';
+    const spotBlue = '#00a0df';
     const spotFont = "Muli, Arial, Helvetica, sans-serif";
     const siteText = websiteHostname(website).toUpperCase();
     const siteHref = websiteHref || 'https://skygloss.com';
@@ -396,80 +397,67 @@ function buildSig() {
     const linkInk = `font-family:${spotFont};font-size:10px;line-height:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:${ink};text-decoration:none`;
     const linkBlue = `font-family:${spotFont};font-size:10px;line-height:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:${spotBlue};text-decoration:none`;
     const clipCell = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    const pad = 'padding-left:12px;padding-right:8px';
 
-    // Desktop reference: 600×240 → left 240 / right 360; script 125×84 at y≈58.
     const spotW = 600;
     const spotH = 240;
     const leftW = 240;
     const rightW = 360;
-    const leftImgW = 125;
-    const leftImgH = 84;
-    // Residual gap after name/title so script starts near y=58 at desktop.
-    // (% of left-col width) — media query tightens this on small screens.
-    const seamPadPct = '8%';
-    const scriptColPct = Math.round((leftImgW / leftW) * 100); // 52
-    const scriptGapPct = 100 - scriptColPct; // 48
+    // Full blue script (447×151) — sit across the center, hanging from the top.
+    const sigW = 280;
+    const sigH = 95;
 
     const contactRows = [
       tel
-        ? `<tr><td class="sg-text" style="padding:8px 8px 0 12px;${textBase};color:${ink};${clipCell}"><a href="${telHref(tel)}" style="${linkInk}">${telText}</a></td></tr>`
+        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:6px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${telHref(tel)}" style="${linkInk}">${telText}</a></td></tr>`
         : '',
       email
-        ? `<tr><td class="sg-text" style="padding:5px 8px 0 12px;${textBase};color:${ink};${clipCell}"><a href="${mailtoHref(email)}" style="${linkInk}">${emailText.toUpperCase()}</a></td></tr>`
+        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:4px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${mailtoHref(email)}" style="${linkInk}">${emailText.toUpperCase()}</a></td></tr>`
         : '',
     ].join('');
 
-    // Inline CSS only in the live markup (avoids legacy-table-attrs lint).
-    // Outlook still gets width/bgcolor via the MSO wrapper below.
     return `<!-- SkyGloss signature -->
 <style type="text/css">
   @media screen and (max-width:620px){
-    .sg-sig{width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important}
-    .sg-left{width:40%!important;max-width:40%!important;min-width:0!important;height:auto!important}
-    .sg-right{width:60%!important;max-width:60%!important;min-width:0!important;height:auto!important}
-    .sg-right img,.sg-script img{width:100%!important;max-width:100%!important;height:auto!important}
+    .sg-sig{width:100%!important;max-width:100%!important;min-width:0!important}
+    .sg-left{width:40%!important;max-width:40%!important}
+    .sg-right{width:60%!important;max-width:60%!important}
+    .sg-right img,.sg-script{width:100%!important;max-width:100%!important;height:auto!important}
     .sg-text{font-size:8px!important;line-height:10px!important;letter-spacing:0.06em!important}
-    .sg-pad{padding-left:6px!important;padding-right:4px!important;padding-top:6px!important}
-    .sg-seam{padding-top:2%!important}
+    .sg-pad{padding-left:6px!important;padding-right:4px!important}
   }
 </style>
 <!--[if mso]>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${spotW}" bgcolor="${panelBg}" style="width:${spotW}px;border-collapse:collapse;background-color:${panelBg}"><tr><td>
 <![endif]-->
-<table class="sg-sig" role="presentation" style="font-family:${spotFont};width:100%;max-width:${spotW}px;border-collapse:collapse;border-spacing:0;table-layout:fixed;background-color:${panelBg};mso-table-lspace:0pt;mso-table-rspace:0pt;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+<table class="sg-sig" role="presentation" width="${spotW}" style="font-family:${spotFont};width:100%;max-width:${spotW}px;border-collapse:collapse;border-spacing:0;table-layout:fixed;background-color:${panelBg};mso-table-lspace:0pt;mso-table-rspace:0pt;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
   <tr>
-    <td class="sg-left" style="width:40%;max-width:40%;vertical-align:top;background-color:${panelBg};padding:0;margin:0;border:0;font-size:0;line-height:0;overflow:hidden">
+    <td class="sg-left" width="${leftW}" style="width:40%;max-width:40%;vertical-align:top;background-color:${panelBg};padding:0;margin:0;border:0;overflow:visible">
       <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed">
         <tr>
-          <td class="sg-text sg-pad" style="padding:14px 8px 0 12px;${textBase};color:${ink};${clipCell}">${nameText}</td>
+          <td class="sg-text sg-pad" style="${pad};padding-top:14px;padding-bottom:0;${textBase};color:${ink};${clipCell}">${nameText}</td>
         </tr>
-        ${title ? `<tr><td class="sg-text sg-pad" style="padding:3px 8px 0 12px;${textBase};color:${spotBlue};${clipCell}">${titleText}</td></tr>` : ''}
+        ${title ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:3px;padding-bottom:0;${textBase};color:${spotBlue};${clipCell}">${titleText}</td></tr>` : ''}
         <tr>
-          <td class="sg-seam" style="padding:${seamPadPct} 0 0 0;margin:0;font-size:0;line-height:0;vertical-align:top">
-            <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%">
-              <tr>
-                <td style="width:${scriptGapPct}%;font-size:0;line-height:0">&nbsp;</td>
-                <td class="sg-script" style="width:${scriptColPct}%;font-size:0;line-height:0;vertical-align:top">
-                  <img src="${LEFT_FRAME_SRC}" alt="" width="${leftImgW}" height="${leftImgH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
-                </td>
-              </tr>
-            </table>
+          <td style="padding:10px 0 0 0;margin:0;font-size:0;line-height:0;text-align:right;vertical-align:top;overflow:visible">
+            <!-- Extends ~40% into the photo half so it sits across the card center -->
+            <img class="sg-script" src="${BLUE_SIG_SRC}" alt="Factory Forever" width="${sigW}" height="${sigH}" style="display:inline-block;width:${sigW}px;max-width:none;height:auto;border:0;outline:none;text-decoration:none;margin:0 -110px 0 0;padding:0;vertical-align:top;position:relative;z-index:2">
           </td>
         </tr>
         ${contactRows}
         <tr>
-          <td class="sg-text sg-pad" style="padding:6px 8px 0 12px;${textBase};color:${ink};${clipCell}">SKYGLOSS, INC.</td>
+          <td class="sg-text sg-pad" style="${pad};padding-top:6px;padding-bottom:0;${textBase};color:${ink};${clipCell}">SKYGLOSS, INC.</td>
         </tr>
         <tr>
-          <td class="sg-text sg-pad" style="padding:5px 8px 8px 12px;${textBase};color:${spotBlue};${clipCell}">
+          <td class="sg-text sg-pad" style="${pad};padding-top:4px;padding-bottom:12px;${textBase};color:${spotBlue};${clipCell}">
             <a href="${siteHref}" target="_blank" style="${linkBlue}">${escapeHtml(siteText)}</a>
           </td>
         </tr>
       </table>
     </td>
-    <td class="sg-right" style="width:60%;max-width:60%;padding:0;margin:0;border:0;vertical-align:top;font-size:0;line-height:0">
+    <td class="sg-right" width="${rightW}" style="width:60%;max-width:60%;padding:0;margin:0;border:0;vertical-align:top;font-size:0;line-height:0">
       <a href="${siteHref}" target="_blank" style="display:block;border:0;text-decoration:none;line-height:0;font-size:0">
-        <img src="${RIGHT_FRAME_SRC}" alt="SkyGloss — Factory Forever" width="${rightW}" height="${spotH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
+        <img src="${SPOTLIGHT_IMG_SRC}" alt="SkyGloss" width="${rightW}" height="${spotH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
       </a>
     </td>
   </tr>
@@ -664,7 +652,7 @@ function render() {
 }
 
 async function copyHTML() {
-  const plainText = buildClipboardPlainText();
+  // Full signature markup with absolute asset URLs — paste into email / template.
   let html = g('sig_preview').innerHTML.trim();
 
   try {
@@ -678,6 +666,7 @@ async function copyHTML() {
       SPOTLIGHT_BG_SRC,
       LEFT_FRAME_SRC,
       RIGHT_FRAME_SRC,
+      BLUE_SIG_SRC,
       ...Object.values(ICON_SRCS),
     ];
     hosted.forEach((src) => {
@@ -685,30 +674,44 @@ async function copyHTML() {
     });
   }
 
+  // Keep the hidden textarea in sync so fallbacks also copy the complete HTML.
+  const out = g('html_out');
+  if (out) out.value = html;
+
   try {
     if (navigator.clipboard?.write && window.ClipboardItem) {
+      // text/html → rich paste in Gmail/Outlook; text/plain → HTML source for templates.
       await navigator.clipboard.write([
         new ClipboardItem({
           'text/html': new Blob([html], { type: 'text/html' }),
-          'text/plain': new Blob([plainText], { type: 'text/plain' }),
+          'text/plain': new Blob([html], { type: 'text/plain' }),
         }),
       ]);
     } else {
-      copyRichHTMLFallback(html, plainText);
+      copyRichHTMLFallback(html, html);
     }
   } catch {
     try {
-      copyRichHTMLFallback(html, plainText);
+      copyRichHTMLFallback(html, html);
     } catch {
-      const ta = g('html_out');
-      ta.focus();
-      ta.select();
-      document.execCommand('copy');
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(html);
+      } else if (out) {
+        out.focus();
+        out.select();
+        document.execCommand('copy');
+      }
     }
   }
   const t = g('toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  if (t) {
+    t.textContent = '✓ HTML copied — paste into your template';
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+      t.textContent = '✓ Copied to clipboard!';
+    }, 2200);
+  }
 }
 
 async function downloadHTML() {

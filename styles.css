@@ -119,6 +119,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 #sig_preview .sg-sig,
 #sig_preview table.sg-sig{width:100%!important;max-width:100%!important;min-width:0!important}
 #sig_preview img{max-width:100%;height:auto}
+/* Spotlight: let the center signature overlap the photo half. */
+#sig_preview .sg-sig{overflow:visible}
+#sig_preview .sg-left{overflow:visible!important}
+#sig_preview .sg-script{max-width:none!important}
 
 @media (max-width: 640px){
   .prev-stage{padding:16px 10px;justify-content:center;align-items:flex-start}
