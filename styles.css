@@ -119,10 +119,16 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 #sig_preview .sg-sig,
 #sig_preview table.sg-sig{width:100%!important;max-width:100%!important;min-width:0!important}
 #sig_preview img{max-width:100%;height:auto}
-/* Spotlight: let the center signature overlap the photo half. */
-#sig_preview .sg-sig{overflow:visible}
-#sig_preview .sg-left{overflow:visible!important}
-#sig_preview .sg-script{max-width:none!important}
+/* Spotlight double-BG: lock 600×240 aspect so the composite fills the cell. */
+#sig_preview .sg-bg{
+  height:auto!important;
+  max-height:none!important;
+  aspect-ratio:600 / 240;
+  background-size:100% 100%!important;
+  overflow:hidden!important
+}
+#sig_preview .sg-left,
+#sig_preview .sg-right{height:100%!important}
 
 @media (max-width: 640px){
   .prev-stage{padding:16px 10px;justify-content:center;align-items:flex-start}

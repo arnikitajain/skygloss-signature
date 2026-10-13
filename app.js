@@ -12,6 +12,8 @@ const SPOTLIGHT_BG_SRC = './assets/email-signature-bg.png';
 const LEFT_FRAME_SRC = './assets/left-frame.png';
 const RIGHT_FRAME_SRC = './assets/right-frame.png';
 const BLUE_SIG_SRC = './assets/blue_signatur.svg';
+const BLUE_SIG_PNG_SRC = './assets/blue_signatur.png';
+const SPOTLIGHT_DOUBLE_BG_SRC = './assets/spotlight-double-bg.png';
 const PUBLIC_ASSET_BASE = 'https://skygloss-signature-builder.netlify.app/';
 const ICON_SRCS = {
   tel: './assets/icon-phone.svg',
@@ -125,6 +127,8 @@ async function buildClipboardHTML() {
     LEFT_FRAME_SRC,
     RIGHT_FRAME_SRC,
     BLUE_SIG_SRC,
+    BLUE_SIG_PNG_SRC,
+    SPOTLIGHT_DOUBLE_BG_SRC,
   ];
   for (const src of hostedAssets) {
     html = html.replace(new RegExp(escapeRegExp(src), 'g'), absoluteAssetUrl(src));
@@ -380,8 +384,8 @@ function buildSig() {
   // Layout numbering follows picker order:
   // 7 Spotlight (first in picker), 1 Showcase, 2 Ribbon, 3 Classic, 4 Banner, 5 Studio, 6 Split
 
-  // Spotlight: white identity panel + main-image half, with blue Factory Forever
-  // signature centered across the seam from the top.
+  // Spotlight: double BG composite (white left + main-image right + blue
+  // Factory Forever baked in). Live text overlays the left panel only.
   if (layout === 7) {
     const spotBlue = '#00a0df';
     const spotFont = "Muli, Arial, Helvetica, sans-serif";
@@ -402,63 +406,81 @@ function buildSig() {
     const spotW = 600;
     const spotH = 240;
     const leftW = 240;
-    const rightW = 360;
-    // Full blue script (447×151) — sit across the center, hanging from the top.
-    const sigW = 280;
-    const sigH = 95;
+    const bgSrc = SPOTLIGHT_DOUBLE_BG_SRC;
+    // Baked signature sits ~y=44–145; keep contacts below it.
+    const sigGap = 100;
 
     const contactRows = [
       tel
-        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:6px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${telHref(tel)}" style="${linkInk}">${telText}</a></td></tr>`
+        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:4px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${telHref(tel)}" style="${linkInk}">${telText}</a></td></tr>`
         : '',
       email
-        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:4px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${mailtoHref(email)}" style="${linkInk}">${emailText.toUpperCase()}</a></td></tr>`
+        ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:3px;padding-bottom:0;${textBase};color:${ink};${clipCell}"><a href="${mailtoHref(email)}" style="${linkInk}">${emailText.toUpperCase()}</a></td></tr>`
         : '',
     ].join('');
+
+    const leftCopy = `<table role="presentation" width="100%" height="${spotH}" style="border-collapse:collapse;border-spacing:0;width:100%;height:100%;max-width:${leftW}px;table-layout:fixed">
+        <tr>
+          <td valign="top" style="vertical-align:top;padding:0">
+            <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%">
+              <tr>
+                <td class="sg-text sg-pad" style="${pad};padding-top:12px;padding-bottom:0;${textBase};color:${ink};${clipCell}">${nameText}</td>
+              </tr>
+              ${title ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:2px;padding-bottom:0;${textBase};color:${spotBlue};${clipCell}">${titleText}</td></tr>` : ''}
+              <tr><td class="sg-gap" height="${sigGap}" style="height:${sigGap}px;line-height:${sigGap}px;font-size:0;mso-line-height-rule:exactly">&nbsp;</td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" style="vertical-align:bottom;padding:0">
+            <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%">
+              ${contactRows}
+              <tr>
+                <td class="sg-text sg-pad" style="${pad};padding-top:3px;padding-bottom:2px;${textBase};color:${ink};${clipCell}">SKYGLOSS, INC.</td>
+              </tr>
+              <tr>
+                <td class="sg-text sg-pad" style="${pad};padding-top:0;padding-bottom:10px;${textBase};color:${spotBlue};${clipCell}">
+                  <a href="${siteHref}" target="_blank" style="${linkBlue}">${escapeHtml(siteText)}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>`;
 
     return `<!-- SkyGloss signature -->
 <style type="text/css">
   @media screen and (max-width:620px){
     .sg-sig{width:100%!important;max-width:100%!important;min-width:0!important}
-    .sg-left{width:40%!important;max-width:40%!important}
-    .sg-right{width:60%!important;max-width:60%!important}
-    .sg-right img,.sg-script{width:100%!important;max-width:100%!important;height:auto!important}
+    .sg-bg{height:auto!important;max-height:none!important;background-size:100% 100%!important}
     .sg-text{font-size:8px!important;line-height:10px!important;letter-spacing:0.06em!important}
     .sg-pad{padding-left:6px!important;padding-right:4px!important}
+    .sg-gap{height:64px!important;line-height:64px!important}
   }
 </style>
 <!--[if mso]>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${spotW}" bgcolor="${panelBg}" style="width:${spotW}px;border-collapse:collapse;background-color:${panelBg}"><tr><td>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${spotW}" height="${spotH}" bgcolor="${panelBg}" style="width:${spotW}px;height:${spotH}px;border-collapse:collapse;background-color:${panelBg}"><tr><td>
 <![endif]-->
 <table class="sg-sig" role="presentation" width="${spotW}" style="font-family:${spotFont};width:100%;max-width:${spotW}px;border-collapse:collapse;border-spacing:0;table-layout:fixed;background-color:${panelBg};mso-table-lspace:0pt;mso-table-rspace:0pt;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
   <tr>
-    <td class="sg-left" width="${leftW}" style="width:40%;max-width:40%;vertical-align:top;background-color:${panelBg};padding:0;margin:0;border:0;overflow:visible">
-      <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed">
-        <tr>
-          <td class="sg-text sg-pad" style="${pad};padding-top:14px;padding-bottom:0;${textBase};color:${ink};${clipCell}">${nameText}</td>
-        </tr>
-        ${title ? `<tr><td class="sg-text sg-pad" style="${pad};padding-top:3px;padding-bottom:0;${textBase};color:${spotBlue};${clipCell}">${titleText}</td></tr>` : ''}
-        <tr>
-          <td style="padding:10px 0 0 0;margin:0;font-size:0;line-height:0;text-align:right;vertical-align:top;overflow:visible">
-            <!-- Extends ~40% into the photo half so it sits across the card center -->
-            <img class="sg-script" src="${BLUE_SIG_SRC}" alt="Factory Forever" width="${sigW}" height="${sigH}" style="display:inline-block;width:${sigW}px;max-width:none;height:auto;border:0;outline:none;text-decoration:none;margin:0 -110px 0 0;padding:0;vertical-align:top;position:relative;z-index:2">
-          </td>
-        </tr>
-        ${contactRows}
-        <tr>
-          <td class="sg-text sg-pad" style="${pad};padding-top:6px;padding-bottom:0;${textBase};color:${ink};${clipCell}">SKYGLOSS, INC.</td>
-        </tr>
-        <tr>
-          <td class="sg-text sg-pad" style="${pad};padding-top:4px;padding-bottom:12px;${textBase};color:${spotBlue};${clipCell}">
-            <a href="${siteHref}" target="_blank" style="${linkBlue}">${escapeHtml(siteText)}</a>
-          </td>
-        </tr>
-      </table>
-    </td>
-    <td class="sg-right" width="${rightW}" style="width:60%;max-width:60%;padding:0;margin:0;border:0;vertical-align:top;font-size:0;line-height:0">
-      <a href="${siteHref}" target="_blank" style="display:block;border:0;text-decoration:none;line-height:0;font-size:0">
-        <img src="${SPOTLIGHT_IMG_SRC}" alt="SkyGloss" width="${rightW}" height="${spotH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
-      </a>
+    <td class="sg-bg" background="${bgSrc}" bgcolor="${panelBg}" width="${spotW}" height="${spotH}" valign="top" style="width:100%;max-width:${spotW}px;height:${spotH}px;max-height:${spotH}px;padding:0;margin:0;border:0;vertical-align:top;overflow:hidden;background-image:url('${bgSrc}');background-repeat:no-repeat;background-position:left top;background-size:100% 100%;background-color:${panelBg}">
+      <!--[if gte mso 9]>
+      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:${spotW}px;height:${spotH}px">
+        <v:fill type="frame" src="${bgSrc}" color="${panelBg}" />
+        <v:textbox inset="0,0,0,0">
+      <![endif]-->
+      <div style="max-height:${spotH}px;overflow:hidden;height:${spotH}px">
+        <table role="presentation" width="100%" height="${spotH}" style="border-collapse:collapse;border-spacing:0;width:100%;height:${spotH}px;table-layout:fixed">
+          <tr>
+            <td class="sg-left" width="${leftW}" height="${spotH}" style="width:40%;max-width:40%;height:${spotH}px;vertical-align:top;padding:0">${leftCopy}</td>
+            <td class="sg-right" height="${spotH}" style="width:60%;max-width:60%;height:${spotH}px;padding:0;font-size:0;line-height:0">&nbsp;</td>
+          </tr>
+        </table>
+      </div>
+      <!--[if gte mso 9]>
+        </v:textbox>
+      </v:rect>
+      <![endif]-->
     </td>
   </tr>
 </table>
@@ -667,6 +689,8 @@ async function copyHTML() {
       LEFT_FRAME_SRC,
       RIGHT_FRAME_SRC,
       BLUE_SIG_SRC,
+      BLUE_SIG_PNG_SRC,
+      SPOTLIGHT_DOUBLE_BG_SRC,
       ...Object.values(ICON_SRCS),
     ];
     hosted.forEach((src) => {
