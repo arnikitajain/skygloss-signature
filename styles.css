@@ -83,9 +83,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 @media (max-width: 900px){
   .grid{grid-template-columns:1fr}
   .lpick{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pnl[style*="sticky"]{position:relative!important;top:auto!important}
 }
 @media (max-width: 520px){
+  .wrap{padding:20px 14px 40px}
+  .hdr{gap:10px;padding-bottom:18px;margin-bottom:24px;flex-wrap:wrap}
+  .hdr-logo{height:26px}
+  .hdr-ttl{font-size:14px;letter-spacing:.06em}
   .lpick{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pnl-body{padding:16px}
 }
 
 /* PREVIEW TOOLBAR */
@@ -104,10 +110,25 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .btn-sky:hover{background:var(--sky-dark);border-color:var(--sky-dark);color:#fff}
 
 /* STAGE */
-.prev-stage{padding:40px 36px;min-height:260px;flex:1;display:flex;align-items:center;justify-content:center;transition:background .3s}
+.prev-stage{padding:40px 36px;min-height:260px;flex:1;display:flex;align-items:center;justify-content:center;transition:background .3s;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .prev-stage.bg-dark{background:#111418}
 .prev-stage.bg-mid{background:#edf1f5}
 .prev-stage.bg-white{background:#ffffff}
+/* Fluid signature preview — scales with stage width like mobile email clients. */
+#sig_preview{width:100%;max-width:600px;margin:0 auto}
+#sig_preview .sg-sig,
+#sig_preview table.sg-sig{width:100%!important;max-width:100%!important;min-width:0!important}
+#sig_preview img{max-width:100%;height:auto}
+
+@media (max-width: 640px){
+  .prev-stage{padding:16px 10px;justify-content:center;align-items:flex-start}
+  .prev-tb{padding:12px 14px}
+  .prev-actions{width:100%}
+  .bg-btns{flex:1 1 100%}
+  .bg-btn{flex:1}
+  .btn,.btn-sky{flex:1;text-align:center}
+  #toast{left:16px;right:16px;bottom:16px;text-align:center}
+}
 
 /* HTML output */
 .out-wrap{padding:16px 22px 20px;border-top:1px solid var(--border);background:var(--surface2)}

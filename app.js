@@ -116,16 +116,51 @@ async function buildClipboardHTML() {
     }
   }
 
-  html = html.replace(new RegExp(escapeRegExp(BANNER_SRC), 'g'), absoluteAssetUrl(BANNER_SRC));
-  html = html.replace(new RegExp(escapeRegExp(SPOTLIGHT_IMG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_IMG_SRC));
-  html = html.replace(new RegExp(escapeRegExp(FACTORY_SIG_SRC), 'g'), absoluteAssetUrl(FACTORY_SIG_SRC));
-  html = html.replace(new RegExp(escapeRegExp(SPOTLIGHT_BG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_BG_SRC));
-  html = html.replace(new RegExp(escapeRegExp(LEFT_FRAME_SRC), 'g'), absoluteAssetUrl(LEFT_FRAME_SRC));
-  html = html.replace(new RegExp(escapeRegExp(RIGHT_FRAME_SRC), 'g'), absoluteAssetUrl(RIGHT_FRAME_SRC));
+  const hostedAssets = [
+    BANNER_SRC,
+    SPOTLIGHT_IMG_SRC,
+    FACTORY_SIG_SRC,
+    SPOTLIGHT_BG_SRC,
+    LEFT_FRAME_SRC,
+    RIGHT_FRAME_SRC,
+  ];
+  for (const src of hostedAssets) {
+    html = html.replace(new RegExp(escapeRegExp(src), 'g'), absoluteAssetUrl(src));
+  }
 
+  // Strip preview-only wrappers; keep a single presentation table for paste stability.
   const root = document.createElement('div');
   root.innerHTML = html;
+  root.querySelectorAll('[data-sg-preview]').forEach((el) => el.remove());
   return root.innerHTML.trim();
+}
+
+function telHref(value) {
+  if (!value) return '';
+  const cleaned = value.replace(/[^\d+]/g, '');
+  return cleaned ? `tel:${cleaned}` : `tel:${value}`;
+}
+
+function mailtoHref(value) {
+  if (!value) return '';
+  return `mailto:${value.trim()}`;
+}
+
+function websiteHostname(website) {
+  if (!website) return 'skygloss.com';
+  try {
+    return new URL(normalizeHttpUrl(website)).hostname.replace(/^www\./i, '');
+  } catch {
+    return website.replace(/^https?:\/\//i, '').split('/')[0] || 'skygloss.com';
+  }
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 async function buildCompositeBannerDataUrl(width = 650) {
@@ -141,15 +176,15 @@ async function buildCompositeBannerDataUrl(width = 650) {
 
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '400 26px Mulish, Arial, sans-serif';
+  ctx.font = '400 26px Muli, Arial, Helvetica, sans-serif';
   ctx.fillText('STOP POLISHING PAINT', 32, 24);
 
   ctx.fillStyle = '#11A3E6';
-  ctx.font = 'italic 400 26px Mulish, Arial, sans-serif';
+  ctx.font = 'italic 400 26px Muli, Arial, Helvetica, sans-serif';
   ctx.fillText('START REBUILDING IT!', 32, 60);
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '400 12px Mulish, Arial, sans-serif';
+  ctx.font = '400 12px Muli, Arial, Helvetica, sans-serif';
   ctx.fillText('An easier approach to modern paint correction.', 32, 100);
 
   return canvas.toDataURL('image/png');
@@ -237,23 +272,26 @@ function businessCardIcons() {
 }
 
 function buildRows({ tel, mobile, email, website, address, bg, includeWebsite = true }) {
+  // Dark preview uses brighter accents; shipped HTML keeps light-mode-safe ink so
+  // clients that invert or partially invert still keep readable contrast.
   const accent = (bg === 'dark') ? '#4cc3ff' : '#00a0df';
-  const textCol = (bg === 'dark') ? '#e2e8f0' : '#4a5a6a';
+  const textCol = (bg === 'dark') ? '#e8eef4' : '#3d4f63';
   const linkCol = accent;
   const ic = icons(accent);
   const websiteHref = normalizeHttpUrl(website);
 
-  const cellStyle = `padding:1.5px 0;color:${textCol};font-size:11px;font-family:Mulish,Arial,sans-serif;white-space:nowrap`;
-  const cellStyleWrap = `padding:1.5px 0;color:${textCol};font-size:11px;font-family:Mulish,Arial,sans-serif`;
-  const linkText = `color:${textCol};text-decoration:none`;
-  const linkAccent = `color:${linkCol};text-decoration:none`;
+  const emailFont = 'Muli, Arial, Helvetica, sans-serif';
+  const cellStyle = `padding:1.5px 0;color:${textCol};font-size:11px;line-height:16px;font-family:${emailFont};white-space:nowrap;mso-line-height-rule:exactly`;
+  const cellStyleWrap = `padding:1.5px 0;color:${textCol};font-size:11px;line-height:16px;font-family:${emailFont};mso-line-height-rule:exactly`;
+  const linkText = `color:${textCol};text-decoration:none;font-family:${emailFont}`;
+  const linkAccent = `color:${linkCol};text-decoration:none;font-family:${emailFont}`;
   const addressPretty = (address || '').replace(/\s*,\s*The Netherlands\s*$/i, '<br/>The Netherlands');
 
   const rows = [
-    tel ? `<tr><td style="${cellStyle}">${ic.tel}<a href="tel:${tel}" style="${linkText}">${tel}</a></td></tr>` : '',
-    mobile ? `<tr><td style="${cellStyle}">${ic.mobile}<a href="tel:${mobile}" style="${linkText}">${mobile}</a></td></tr>` : '',
-    email ? `<tr><td style="${cellStyle}">${ic.email}<a href="mailto:${email}" style="${linkAccent}">${email}</a></td></tr>` : '',
-    (includeWebsite && website) ? `<tr><td style="${cellStyle}">${ic.web}<a href="${websiteHref}" style="${linkAccent}">${website.replace(/^https?:\/\//,'')}</a></td></tr>` : '',
+    tel ? `<tr><td style="${cellStyle}">${ic.tel}<a href="${telHref(tel)}" style="${linkText}">${tel}</a></td></tr>` : '',
+    mobile ? `<tr><td style="${cellStyle}">${ic.mobile}<a href="${telHref(mobile)}" style="${linkText}">${mobile}</a></td></tr>` : '',
+    email ? `<tr><td style="${cellStyle}">${ic.email}<a href="${mailtoHref(email)}" style="${linkAccent}">${email}</a></td></tr>` : '',
+    (includeWebsite && website) ? `<tr><td style="${cellStyle}">${ic.web}<a href="${websiteHref}" target="_blank" style="${linkAccent}">${website.replace(/^https?:\/\//,'')}</a></td></tr>` : '',
     address ? `<tr><td style="${cellStyleWrap}">${ic.addr}${addressPretty}</td></tr>` : '',
   ].join('');
 
@@ -308,17 +346,17 @@ function buildSig() {
   const { rows: employeeRowsNoWebsite } = buildRows({ tel, mobile, email, website, address, bg, includeWebsite: false });
 
   const hBadge = opts.hiring
-    ? `<td style="padding:0;vertical-align:middle"><span style="background:${accent};color:#fff;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:3px;white-space:nowrap;font-family:Mulish,Arial,sans-serif">🚀 We're Hiring</span></td>`
+    ? `<td style="padding:0;vertical-align:middle"><span style="background:${accent};color:#fff;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:3px;white-space:nowrap;font-family:Muli, Arial, Helvetica, sans-serif">🚀 We're Hiring</span></td>`
     : '';
   const dBadge = opts.demo
-    ? `<td style="padding:0 0 0 7px;vertical-align:middle"><a href="${demoHref}" style="display:inline-block;border:1.5px solid ${accent};color:${accent};font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:3px;text-decoration:none;font-family:Mulish,Arial,sans-serif;white-space:nowrap">Book a Consultation →</a></td>`
+    ? `<td style="padding:0 0 0 7px;vertical-align:middle"><a href="${demoHref}" style="display:inline-block;border:1.5px solid ${accent};color:${accent};font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:3px;text-decoration:none;font-family:Muli, Arial, Helvetica, sans-serif;white-space:nowrap">Book a Consultation →</a></td>`
     : '';
   const badgeCells = `${hBadge}${dBadge}`;
   const badges = (opts.hiring || opts.demo)
     ? `<tr><td style="padding-top:9px"><table cellpadding="0" cellspacing="0" border="0"><tr>${badgeCells}</tr></table></td></tr>`
     : '';
   const taglineInner = (opts.tagline && (opts.taglineMode || 'text') === 'text')
-    ? `<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding-top:10px;border-top:1px solid #e0e8f0;font-size:9.5px;color:#a0aab4;font-style:italic;line-height:1.55;font-family:Mulish,Arial,sans-serif">${TAGLINE}</td></tr></table>`
+    ? `<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="padding-top:10px;border-top:1px solid #e0e8f0;font-size:9.5px;color:#a0aab4;font-style:italic;line-height:1.55;font-family:Muli, Arial, Helvetica, sans-serif">${TAGLINE}</td></tr></table>`
     : '';
 
   const bannerImage = ({ width = 420 } = {}) => {
@@ -330,7 +368,7 @@ function buildSig() {
     const siteColor = websiteOnDark ? '#4cc3ff' : accent;
     const logoStyleExtra = align === 'center' ? 'margin:0 auto;' : '';
     const logoHtml = `<img src="${logoSrc}" alt="SkyGloss" style="display:block;${logoStyleExtra}height:${logoHeight}px;width:auto;max-width:${logoMaxWidth}px">`;
-    const site = (showWebsite && website) ? `<div style="padding-top:8px;font-size:10.5px;font-family:Mulish,Arial,sans-serif;white-space:nowrap"><a href="${websiteHref}" style="color:${siteColor};text-decoration:none">${website.replace(/^https?:\/\//,'')}</a></div>` : '';
+    const site = (showWebsite && website) ? `<div style="padding-top:8px;font-size:10.5px;line-height:14px;font-family:Muli, Arial, Helvetica, sans-serif;white-space:nowrap"><a href="${websiteHref}" target="_blank" style="color:${siteColor};text-decoration:none;font-family:Muli, Arial, Helvetica, sans-serif">${website.replace(/^https?:\/\//,'')}</a></div>` : '';
     return `<div style="text-align:${align}">${logoHtml}${site}</div>`;
   };
 
@@ -340,54 +378,114 @@ function buildSig() {
   // Layout numbering follows picker order:
   // 7 Spotlight (first in picker), 1 Showcase, 2 Ribbon, 3 Classic, 4 Banner, 5 Studio, 6 Split
 
-  // Spotlight: bold two-panel banner — black identity panel + hero image.
-  // Fixed design; extra fields (mobile, address, company, tagline, badges) are ignored.
+  // Spotlight: two-panel banner — white identity panel + hero image.
+  // Fluid 40/60 table (max 600px) so mobile scales the whole unit and the
+  // Factory Forever seam stays joined. Extra fields ignored.
   if (layout === 7) {
     const spotBlue = '#11a3e6';
-    const spotFont = 'Muli, Mulish, Arial, sans-serif';
-    const siteText = (website ? website.replace(/^https?:\/\//, '') : 'skygloss.com').toUpperCase();
-    const linkStyle = `font-family:${spotFont};color:#000000;text-decoration:none`;
-    const contactStyle = `font-size:10px;line-height:1.0;color:#000000;font-family:${spotFont};letter-spacing:.25em`;
-    const contactRows = [
-      tel ? `<div style="${contactStyle}"><a href="tel:${tel}" style="${linkStyle}">${tel}</a></div>` : '',
-      email ? `<div style="${contactStyle};padding-top:8px"><a href="mailto:${email}" style="${linkStyle}">${email.toUpperCase()}</a></div>` : '',
-    ].join('');
-    // Whole banner is 2.5:1 (1000:400 -> 600x240), scale 0.6. Email-safe two-cell
-    // table (Gmail/Outlook strip position + background-image, so no overlay):
-    //   Left cell  = solid white panel with live text; the left half of the
-    //                "Factory Forever" script (left-frame.png, blue on transparent)
-    //                sits flush to the seam so it continues into the right cell.
-    //   Right cell = right-frame.png (photo + right half of the script).
-    // left-frame source 208x139 -> 125x83 displayed; right-frame 598x400 -> 360x240 (both ~0.6 scale).
+    const spotFont = "Muli, Arial, Helvetica, sans-serif";
+    const siteText = websiteHostname(website).toUpperCase();
+    const siteHref = websiteHref || 'https://skygloss.com';
+    const nameText = escapeHtml(name);
+    const titleText = escapeHtml(title);
+    const telText = escapeHtml(tel);
+    const emailText = escapeHtml(email);
+    const ink = '#111111';
+    const panelBg = '#ffffff';
+    const textBase = `font-family:${spotFont};font-size:10px;line-height:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;mso-line-height-rule:exactly;-webkit-text-size-adjust:100%`;
+    const linkInk = `font-family:${spotFont};font-size:10px;line-height:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:${ink};text-decoration:none`;
+    const linkBlue = `font-family:${spotFont};font-size:10px;line-height:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:${spotBlue};text-decoration:none`;
+    const clipCell = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+
+    // Desktop reference: 600×240 → left 240 / right 360; script 125×84 at y≈58.
+    const spotW = 600;
     const spotH = 240;
-    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:${spotFont};width:600px;max-width:600px;border-collapse:collapse;table-layout:fixed;background:#ffffff">
+    const leftW = 240;
+    const rightW = 360;
+    const leftImgW = 125;
+    const leftImgH = 84;
+    // Residual gap after name/title so script starts near y=58 at desktop.
+    // (% of left-col width) — media query tightens this on small screens.
+    const seamPadPct = '8%';
+    const scriptColPct = Math.round((leftImgW / leftW) * 100); // 52
+    const scriptGapPct = 100 - scriptColPct; // 48
+
+    const contactRows = [
+      tel
+        ? `<tr><td class="sg-text" style="padding:8px 8px 0 12px;${textBase};color:${ink};${clipCell}"><a href="${telHref(tel)}" style="${linkInk}">${telText}</a></td></tr>`
+        : '',
+      email
+        ? `<tr><td class="sg-text" style="padding:5px 8px 0 12px;${textBase};color:${ink};${clipCell}"><a href="${mailtoHref(email)}" style="${linkInk}">${emailText.toUpperCase()}</a></td></tr>`
+        : '',
+    ].join('');
+
+    // Inline CSS only in the live markup (avoids legacy-table-attrs lint).
+    // Outlook still gets width/bgcolor via the MSO wrapper below.
+    return `<!-- SkyGloss signature -->
+<style type="text/css">
+  @media screen and (max-width:620px){
+    .sg-sig{width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important}
+    .sg-left{width:40%!important;max-width:40%!important;min-width:0!important;height:auto!important}
+    .sg-right{width:60%!important;max-width:60%!important;min-width:0!important;height:auto!important}
+    .sg-right img,.sg-script img{width:100%!important;max-width:100%!important;height:auto!important}
+    .sg-text{font-size:8px!important;line-height:10px!important;letter-spacing:0.06em!important}
+    .sg-pad{padding-left:6px!important;padding-right:4px!important;padding-top:6px!important}
+    .sg-seam{padding-top:2%!important}
+  }
+</style>
+<!--[if mso]>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${spotW}" bgcolor="${panelBg}" style="width:${spotW}px;border-collapse:collapse;background-color:${panelBg}"><tr><td>
+<![endif]-->
+<table class="sg-sig" role="presentation" style="font-family:${spotFont};width:100%;max-width:${spotW}px;border-collapse:collapse;border-spacing:0;table-layout:fixed;background-color:${panelBg};mso-table-lspace:0pt;mso-table-rspace:0pt;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
   <tr>
-    <td style="width:240px;height:${spotH}px;background:#ffffff;vertical-align:top;padding:0;font-size:0;line-height:0">
-      <div style="padding:24px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:#000000;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${name}</div>
-      ${title ? `<div style="padding:6px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${title}</div>` : ''}
-      <div style="text-align:right;line-height:0;font-size:0">
-        <img src="${LEFT_FRAME_SRC}" alt="" width="128" height="86" style="display:inline-block;width:128px;height:auto;border:0;padding-top:7px;">
-      </div>
-      ${contactRows ? `<div style="padding:6px 0 0 0;font-size:0;line-height:0">${contactRows}</div>` : ''}
-      <div style="padding:11px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:#000000;letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">SKYGLOSS, INC.</div>
-      <div style="padding:8px 0 0 0;font-size:10px;line-height:1.0;font-weight:800;color:${spotBlue};letter-spacing:.25em;text-transform:uppercase;font-family:${spotFont}">${siteText}</div>
+    <td class="sg-left" style="width:40%;max-width:40%;vertical-align:top;background-color:${panelBg};padding:0;margin:0;border:0;font-size:0;line-height:0;overflow:hidden">
+      <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed">
+        <tr>
+          <td class="sg-text sg-pad" style="padding:14px 8px 0 12px;${textBase};color:${ink};${clipCell}">${nameText}</td>
+        </tr>
+        ${title ? `<tr><td class="sg-text sg-pad" style="padding:3px 8px 0 12px;${textBase};color:${spotBlue};${clipCell}">${titleText}</td></tr>` : ''}
+        <tr>
+          <td class="sg-seam" style="padding:${seamPadPct} 0 0 0;margin:0;font-size:0;line-height:0;vertical-align:top">
+            <table role="presentation" style="border-collapse:collapse;border-spacing:0;width:100%">
+              <tr>
+                <td style="width:${scriptGapPct}%;font-size:0;line-height:0">&nbsp;</td>
+                <td class="sg-script" style="width:${scriptColPct}%;font-size:0;line-height:0;vertical-align:top">
+                  <img src="${LEFT_FRAME_SRC}" alt="" width="${leftImgW}" height="${leftImgH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        ${contactRows}
+        <tr>
+          <td class="sg-text sg-pad" style="padding:6px 8px 0 12px;${textBase};color:${ink};${clipCell}">SKYGLOSS, INC.</td>
+        </tr>
+        <tr>
+          <td class="sg-text sg-pad" style="padding:5px 8px 8px 12px;${textBase};color:${spotBlue};${clipCell}">
+            <a href="${siteHref}" target="_blank" style="${linkBlue}">${escapeHtml(siteText)}</a>
+          </td>
+        </tr>
+      </table>
     </td>
-    <td style="width:360px;height:${spotH}px;padding:0;vertical-align:top;font-size:0;line-height:0">
-      <img src="${RIGHT_FRAME_SRC}" alt="SkyGloss" width="360" height="${spotH}" style="display:block;width:360px;height:${spotH}px;border:0">
+    <td class="sg-right" style="width:60%;max-width:60%;padding:0;margin:0;border:0;vertical-align:top;font-size:0;line-height:0">
+      <a href="${siteHref}" target="_blank" style="display:block;border:0;text-decoration:none;line-height:0;font-size:0">
+        <img src="${RIGHT_FRAME_SRC}" alt="SkyGloss — Factory Forever" width="${rightW}" height="${spotH}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0;padding:0">
+      </a>
     </td>
   </tr>
-  </table>`;
+</table>
+<!--[if mso]></td></tr></table><![endif]-->`;
   }
 
-  if (layout === 3) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif">
+  if (layout === 3) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Muli, Arial, Helvetica, sans-serif">
   <tr>
     <td style="vertical-align:middle;padding-right:18px;border-right:2px solid ${accent}">
       ${companySide({ align: 'center', logoHeight: 38, logoMaxWidth: 160 })}
     </td>
     <td style="padding-left:18px;vertical-align:top">
       <table cellpadding="0" cellspacing="0" border="0">
-        <tr><td style="font-size:18px;font-weight:700;color:${accent};letter-spacing:.01em;padding-bottom:1px;font-family:Mulish,Arial,sans-serif">${name}</td></tr>
-        ${title ? `<tr><td style="font-size:10.5px;color:#7a8ea3;text-transform:uppercase;letter-spacing:.09em;padding-bottom:8px;font-family:Mulish,Arial,sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
+        <tr><td style="font-size:18px;font-weight:700;color:${accent};letter-spacing:.01em;padding-bottom:1px;font-family:Muli, Arial, Helvetica, sans-serif">${name}</td></tr>
+        ${title ? `<tr><td style="font-size:10.5px;color:#7a8ea3;text-transform:uppercase;letter-spacing:.09em;padding-bottom:8px;font-family:Muli, Arial, Helvetica, sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
         ${employeeRowsNoWebsite ? `<tr><td><table cellpadding="0" cellspacing="0">${employeeRowsNoWebsite}</table></td></tr>` : ''}
         ${badges}
       </table>
@@ -398,7 +496,7 @@ function buildSig() {
     : (taglineInner ? `<tr><td colspan="2" style="padding-top:10px">${taglineInner}</td></tr>` : '')}
 </table>`;
 
-  if (layout === 5) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif;max-width:620px">
+  if (layout === 5) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Muli, Arial, Helvetica, sans-serif;max-width:620px">
   <tr>
     <td style="padding:0">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e7eef6;border-radius:10px;overflow:hidden">
@@ -408,8 +506,8 @@ function buildSig() {
           </td>
           <td style="padding:16px 18px;vertical-align:top">
             <table cellpadding="0" cellspacing="0" border="0">
-              <tr><td style="font-size:18px;font-weight:800;color:#1a2332;letter-spacing:-.01em;padding-bottom:2px;font-family:Mulish,Arial,sans-serif">${name}</td></tr>
-              ${title ? `<tr><td style="font-size:10.5px;color:${accent};text-transform:uppercase;letter-spacing:.09em;padding-bottom:9px;font-family:Mulish,Arial,sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
+              <tr><td style="font-size:18px;font-weight:800;color:#1a2332;letter-spacing:-.01em;padding-bottom:2px;font-family:Muli, Arial, Helvetica, sans-serif">${name}</td></tr>
+              ${title ? `<tr><td style="font-size:10.5px;color:${accent};text-transform:uppercase;letter-spacing:.09em;padding-bottom:9px;font-family:Muli, Arial, Helvetica, sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
               ${employeeRowsNoWebsite ? `<tr><td><table cellpadding="0" cellspacing="0">${employeeRowsNoWebsite}</table></td></tr>` : ''}
               ${badges}
             </table>
@@ -425,11 +523,11 @@ function buildSig() {
 
   if (layout === 4) {
     const employeeOnly = buildRows({ tel, mobile, email, website, address, bg, includeWebsite: false }).rows;
-    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif;width:420px;max-width:420px">
+    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Muli, Arial, Helvetica, sans-serif;width:420px;max-width:420px">
   <tr>
     <td style="width:200px;vertical-align:top;padding-right:16px;border-right:1px solid ${accent};color:#717171;line-height:18px">
-      <div style="font-size:12pt;color:#000000;font-family:Mulish,Arial,sans-serif;font-weight:700">${name}</div>
-      ${title ? `<div style="font-size:9pt;color:#717171;font-family:Mulish,Arial,sans-serif;padding-top:2px">${title}${company ? ' &middot; ' + company : ''}</div>` : ''}
+      <div style="font-size:12pt;color:#000000;font-family:Muli, Arial, Helvetica, sans-serif;font-weight:700">${name}</div>
+      ${title ? `<div style="font-size:9pt;color:#717171;font-family:Muli, Arial, Helvetica, sans-serif;padding-top:2px">${title}${company ? ' &middot; ' + company : ''}</div>` : ''}
       <div style="padding-top:14px">${companySide({ align: 'left', logoHeight: 22, logoMaxWidth: 170 })}</div>
     </td>
     <td style="width:220px;vertical-align:top;padding-left:18px;line-height:18px">
@@ -445,14 +543,14 @@ function buildSig() {
 
   if (layout === 2) {
     const employeeOnly = buildRows({ tel, mobile, email, website, address, bg, includeWebsite: false }).rows;
-    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif;width:420px;max-width:420px">
+    return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Muli, Arial, Helvetica, sans-serif;width:420px;max-width:420px">
   <tr><td colspan="2" style="font-size:14px;line-height:14px;height:14px">&nbsp;</td></tr>
   <tr><td colspan="2" style="font-size:14px;line-height:14px;height:14px;border-top:1px solid ${accent}">&nbsp;</td></tr>
   <tr>
     <td style="width:200px;vertical-align:top;padding-right:10px;padding-bottom:10px">
       <div style="margin:0;line-height:1.05">
-        <div style="font-size:12pt;color:${accent};font-family:Mulish,Arial,sans-serif;font-weight:800;line-height:18pt">${name}</div>
-        ${title ? `<div style="font-size:9pt;color:#010100;font-family:Mulish,Arial,sans-serif;line-height:14pt">${title}${company ? ' &middot; ' + company : ''}</div>` : ''}
+        <div style="font-size:12pt;color:${accent};font-family:Muli, Arial, Helvetica, sans-serif;font-weight:800;line-height:18pt">${name}</div>
+        ${title ? `<div style="font-size:9pt;color:#010100;font-family:Muli, Arial, Helvetica, sans-serif;line-height:14pt">${title}${company ? ' &middot; ' + company : ''}</div>` : ''}
       </div>
       <div style="padding-top:12px">${companySide({ align: 'left', logoHeight: 24, logoMaxWidth: 160, showWebsite: false })}</div>
     </td>
@@ -465,7 +563,7 @@ function buildSig() {
     : (taglineInner ? `<tr><td colspan="2" style="padding-bottom:14px">${taglineInner}</td></tr>` : '')}
   <tr>
     <td style="vertical-align:top;border-top:1px solid ${accent};padding-top:12px">
-      ${website ? `<a href="${websiteHref}" style="font-size:9pt;font-family:Mulish,Arial,sans-serif;text-decoration:none;color:${accent};font-weight:700">${website.replace(/^https?:\/\//,'')}</a>` : ''}
+      ${website ? `<a href="${websiteHref}" style="font-size:9pt;font-family:Muli, Arial, Helvetica, sans-serif;text-decoration:none;color:${accent};font-weight:700">${website.replace(/^https?:\/\//,'')}</a>` : ''}
     </td>
     <td style="vertical-align:top;border-top:1px solid ${accent};padding-top:12px;text-align:right">
       ${badges ? `<table cellpadding="0" cellspacing="0" border="0" style="float:right"><tr>${hBadge}${dBadge}</tr></table>` : ''}
@@ -475,12 +573,12 @@ function buildSig() {
   }
 
   // layout 2 (Split)
-  if (layout === 6) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Mulish,Arial,sans-serif;max-width:580px;border-top:3px solid ${accent};background:#ffffff">
+  if (layout === 6) return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Muli, Arial, Helvetica, sans-serif;max-width:580px;border-top:3px solid ${accent};background:#ffffff">
   <tr>
     <td style="padding:16px 22px;vertical-align:top;border-right:2px solid #e0e8f0">
       <table cellpadding="0" cellspacing="0" border="0">
-        <tr><td style="font-size:19px;font-weight:700;color:#1a2332;padding-bottom:2px;font-family:Mulish,Arial,sans-serif">${name}</td></tr>
-        ${title ? `<tr><td style="font-size:10.5px;color:${accent};text-transform:uppercase;letter-spacing:.09em;padding-bottom:9px;font-family:Mulish,Arial,sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
+        <tr><td style="font-size:19px;font-weight:700;color:#1a2332;padding-bottom:2px;font-family:Muli, Arial, Helvetica, sans-serif">${name}</td></tr>
+        ${title ? `<tr><td style="font-size:10.5px;color:${accent};text-transform:uppercase;letter-spacing:.09em;padding-bottom:9px;font-family:Muli, Arial, Helvetica, sans-serif">${title}${company ? ' &middot; ' + company : ''}</td></tr>` : ''}
         ${employeeRowsNoWebsite ? `<tr><td><table cellpadding="0" cellspacing="0">${employeeRowsNoWebsite}</table></td></tr>` : ''}
         ${badges}
       </table>
@@ -499,13 +597,13 @@ function buildSig() {
     const contactCell = 'padding:0 0 10px 0';
     const contactCellWrap = 'padding:0';
     const iconCell = 'width:22px;padding:0 10px 0 0;vertical-align:top;line-height:0';
-    const textCell = 'font-size:12px;line-height:1.45;color:#6F6F6F;font-family:Mulish,Arial,sans-serif;padding:0;vertical-align:top';
+    const textCell = 'font-size:12px;line-height:1.45;color:#6F6F6F;font-family:Muli, Arial, Helvetica, sans-serif;padding:0;vertical-align:top';
     const contactLink = 'color:#6F6F6F;text-decoration:none';
     const showcaseAddress = (address || '').replace(/\s*,\s*The Netherlands\s*$/i, ',<br>The Netherlands');
     const showcaseRows = [
-      tel ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.tel}</td><td style="${textCell};white-space:nowrap"><a href="tel:${tel}" style="${contactLink}">${tel}</a></td></tr></table></td></tr>` : '',
-      mobile ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.mobile}</td><td style="${textCell};white-space:nowrap"><a href="tel:${mobile}" style="${contactLink}">${mobile}</a></td></tr></table></td></tr>` : '',
-      email ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.email}</td><td style="${textCell};white-space:nowrap"><a href="mailto:${email}" style="${contactLink}">${email}</a></td></tr></table></td></tr>` : '',
+      tel ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.tel}</td><td style="${textCell};white-space:nowrap"><a href="${telHref(tel)}" style="${contactLink}">${tel}</a></td></tr></table></td></tr>` : '',
+      mobile ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.mobile}</td><td style="${textCell};white-space:nowrap"><a href="${telHref(mobile)}" style="${contactLink}">${mobile}</a></td></tr></table></td></tr>` : '',
+      email ? `<tr><td style="${contactCell}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.email}</td><td style="${textCell};white-space:nowrap"><a href="${mailtoHref(email)}" style="${contactLink}">${email}</a></td></tr></table></td></tr>` : '',
       address ? `<tr><td style="${contactCellWrap}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="${iconCell}">${bc.addr}</td><td style="${textCell}"><span>${showcaseAddress}</span></td></tr></table></td></tr>` : '',
     ].join('');
     const contact = showcaseRows ? `<table cellpadding="0" cellspacing="0" border="0">${showcaseRows}</table>` : '';
@@ -520,13 +618,13 @@ function buildSig() {
     const showcaseTagline = opts.tagline
       ? (tagModeEffective === 'image'
         ? `<tr><td style="padding-top:24px">${bannerImage({ width: 650, overlayText: true })}</td></tr>`
-        : `<tr><td style="padding-top:24px"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#476d8f"><tr><td style="padding:28px 42px;color:#ffffff;font-family:Mulish,Arial,sans-serif"><div style="font-size:26px;line-height:1.2;font-weight:600;text-transform:uppercase;letter-spacing:.02em;font-family:Mulish,Arial,sans-serif">Stop polishing paint<br>start rebuilding it!</div><div style="padding-top:5px;font-size:12px;line-height:1.5;color:#ffffff;font-family:Mulish,Arial,sans-serif;opacity:.9">An easier approach to modern paint correction.</div></td></tr></table></td></tr>`)
+        : `<tr><td style="padding-top:24px"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#476d8f"><tr><td style="padding:28px 42px;color:#ffffff;font-family:Muli, Arial, Helvetica, sans-serif"><div style="font-size:26px;line-height:1.2;font-weight:600;text-transform:uppercase;letter-spacing:.02em;font-family:Muli, Arial, Helvetica, sans-serif">Stop polishing paint<br>start rebuilding it!</div><div style="padding-top:5px;font-size:12px;line-height:1.5;color:#ffffff;font-family:Muli, Arial, Helvetica, sans-serif;opacity:.9">An easier approach to modern paint correction.</div></td></tr></table></td></tr>`)
       : '';
-    return `<table cellpadding="0" cellspacing="0" border="0" width="650" style="font-family:Mulish,Arial,sans-serif;width:650px;min-width:650px;max-width:650px;border-collapse:collapse;table-layout:fixed">
+    return `<table cellpadding="0" cellspacing="0" border="0" width="650" style="font-family:Muli, Arial, Helvetica, sans-serif;width:650px;min-width:650px;max-width:650px;border-collapse:collapse;table-layout:fixed">
   <tr>
     <td style="padding:14px 0 0 0">
-      <div style="font-size:24px;line-height:1.25;color:#232323;font-weight:500;font-family:Mulish,Arial,sans-serif">${name}</div>
-      ${titleHtml ? `<div style="padding-top:6px;font-size:12px;line-height:1.4;color:#6F6F6F;font-family:Mulish,Arial,sans-serif">${titleHtml}</div>` : ''}
+      <div style="font-size:24px;line-height:1.25;color:#232323;font-weight:500;font-family:Muli, Arial, Helvetica, sans-serif">${name}</div>
+      ${titleHtml ? `<div style="padding-top:6px;font-size:12px;line-height:1.4;color:#6F6F6F;font-family:Muli, Arial, Helvetica, sans-serif">${titleHtml}</div>` : ''}
     </td>
   </tr>
   <tr>
@@ -541,7 +639,7 @@ function buildSig() {
           <td style="width:48%;vertical-align:middle;padding:28px 18px 0 0;text-align:center">
             <div style="display:inline-block;text-align:left">
               <img src="${LOGO_SRC}" alt="SkyGloss" style="display:block;height:44px;width:auto;max-width:160px;border:0">
-              ${site ? `<div style="padding-top:4px;font-size:11px;line-height:1.35;color:#6F6F6F;font-family:Mulish,Arial,sans-serif"><a href="${websiteHref}" style="color:#6F6F6F;text-decoration:none">${site}</a></div>` : ''}
+              ${site ? `<div style="padding-top:4px;font-size:11px;line-height:1.35;color:#6F6F6F;font-family:Muli, Arial, Helvetica, sans-serif"><a href="${websiteHref}" style="color:#6F6F6F;text-decoration:none">${site}</a></div>` : ''}
             </div>
           </td>
           <td style="width:52%;vertical-align:top;padding:16px 0 0 10px">
@@ -572,13 +670,17 @@ async function copyHTML() {
   try {
     html = await buildClipboardHTML();
   } catch {
-    html = html
-      .replace(new RegExp(escapeRegExp(LOGO_SRC), 'g'), absoluteAssetUrl(LOGO_SRC))
-      .replace(new RegExp(escapeRegExp(BANNER_SRC), 'g'), absoluteAssetUrl(BANNER_SRC))
-      .replace(new RegExp(escapeRegExp(SPOTLIGHT_IMG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_IMG_SRC))
-      .replace(new RegExp(escapeRegExp(FACTORY_SIG_SRC), 'g'), absoluteAssetUrl(FACTORY_SIG_SRC))
-      .replace(new RegExp(escapeRegExp(SPOTLIGHT_BG_SRC), 'g'), absoluteAssetUrl(SPOTLIGHT_BG_SRC));
-    Object.values(ICON_SRCS).forEach((src) => {
+    const hosted = [
+      LOGO_SRC,
+      BANNER_SRC,
+      SPOTLIGHT_IMG_SRC,
+      FACTORY_SIG_SRC,
+      SPOTLIGHT_BG_SRC,
+      LEFT_FRAME_SRC,
+      RIGHT_FRAME_SRC,
+      ...Object.values(ICON_SRCS),
+    ];
+    hosted.forEach((src) => {
       html = html.replace(new RegExp(escapeRegExp(src), 'g'), absoluteAssetUrl(src));
     });
   }
@@ -609,9 +711,14 @@ async function copyHTML() {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-function downloadHTML() {
-  const sig = g('html_out').value;
-  const full = `<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>SkyGloss Signature</title></head>\n<body style="margin:32px;background:#f4f7fa;font-family:Mulish,Arial,sans-serif">\n<p style="font-size:11px;color:#999;margin-bottom:20px;font-family:Mulish,Arial,sans-serif">SkyGloss Email Signature — copy the HTML below into your email client signature settings.</p>\n${sig}\n</body></html>`;
+async function downloadHTML() {
+  let sig = g('html_out').value;
+  try {
+    sig = await buildClipboardHTML();
+  } catch {
+    // Keep preview HTML if absolute URL rewrite fails.
+  }
+  const full = `<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><title>SkyGloss Signature</title></head>\n<body style="margin:0;padding:0;background:#ffffff;font-family:Muli, Arial, Helvetica, sans-serif">\n${sig}\n</body></html>`;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([full], { type: 'text/html' }));
   a.download = 'skygloss-signature.html';
